@@ -3,7 +3,6 @@
 @inject DepartmentService departmentService
 
 <PageTitle>Department Index</PageTitle>
-
 <div class="container">
     <div class="card shadow-lg">
         @*Header*@
@@ -49,7 +48,7 @@
                     <PropertyColumn Property="@(d => d.Name)" Title="Nombre" Sortable="true" />
                     <PropertyColumn Property="@(d => d.GroupName)" Title="Nombre del Grupo" Sortable="true" />
                     <TemplateColumn Context="option" Title="Opci&oacute;n">
-                        <a href="Department/Edit/@option.DepartmentId" class="btn btn-outline-primary bi bi-edit"></a>
+                        <a href="Department/Edit/@option.DepartmentId" class="btn btn-outline-primary bi bi-pencil"></a>
                     </TemplateColumn>
                 </QuickGrid>
                 @*Pagination*@
@@ -61,4 +60,9 @@
 @code {
     private List<Department> DepartmentsList = new List<Department>();
     private PaginationState pages = new PaginationState{ ItemsPerPage = 5 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        DepartmentsList = await departmentService.GetList(p => true);
+    }
 }
