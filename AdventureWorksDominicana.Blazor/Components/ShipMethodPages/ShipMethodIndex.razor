@@ -19,6 +19,12 @@
                     <PropertyColumn Property="e => e.ShipBase" Title="Costo base" />
                     <PropertyColumn Property="e => e.ShipRate" Title="Costo adicional" />
                     <PropertyColumn Property="e => e.ModifiedDate" Title="Fecha de modificacion" />
+                    <TemplateColumn Title="Acciones">
+                        <a class="btn btn-sm btn-outline-primary"
+                           href="@($"/ShipMethods/Edit/{context.ShipMethodId}")">
+                            <span class="bi bi-pencil-square"></span>
+                        </a>
+                    </TemplateColumn>
                 </QuickGrid>
             </div>
         </div>
