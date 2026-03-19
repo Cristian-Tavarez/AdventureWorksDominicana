@@ -16,6 +16,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<CountryRegionsService>();
 
 builder.Services.AddBlazoredToast();
+builder.Services.AddBlazorBootstrap();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
