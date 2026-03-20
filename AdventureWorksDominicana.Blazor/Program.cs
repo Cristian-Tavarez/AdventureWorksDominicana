@@ -15,7 +15,10 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<CountryRegionsService>();
 
-builder.Services.AddBlazoredToast();
+builder.Services.AddScoped<DepartmentService>();
+builder.Services.AddScoped<PersonService>();
+builder.Services.AddScoped<ShiftService>();
+builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddBlazorBootstrap();
 var app = builder.Build();
 
