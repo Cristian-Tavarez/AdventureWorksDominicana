@@ -20,7 +20,7 @@ builder.Services.AddScoped<DepartmentService>();
 builder.Services.AddScoped<PersonService>();
 builder.Services.AddScoped<ShiftService>();
 builder.Services.AddScoped<EmployeeService>(); 
-builder.Services.AddScoped<ProductCategoryService>();
+builder.Services.AddScoped<PhoneNumberTypeService>();
 builder.Services.AddScoped<ShiftService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<ProductCategoryService>();
