@@ -1,0 +1,92 @@
+﻿@page "/sales-people/create"
+@using AdventureWorksDominicana.Data.Models
+@using AdventureWorksDominicana.Services
+@inject SalesPersonService SalesPersonService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Crear Registro de Vendedor</PageTitle>
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0 fw-bold">Crear Registro de Vendedor</h5>
+        </div>
+        <div class="card-body p-4">
+            <EditForm Model="@vendedor" OnValidSubmit="GuardarVendedor">
+                <DataAnnotationsValidator />
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-bold small">ID de Entidad de Negocio (Empleado)</label>
+                        <InputNumber @bind-Value="vendedor.BusinessEntityId" class="form-control" placeholder="0" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-bold small">ID de Territorio</label>
+                        <InputNumber @bind-Value="vendedor.TerritoryId" class="form-control" placeholder="ID del territorio asignado" />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-bold small">Cuota de Ventas Proyectada</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <InputNumber @bind-Value="vendedor.SalesQuota" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-bold small">Bono por Meta</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <InputNumber @bind-Value="vendedor.Bonus" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-bold small">Porcentaje de Comisión</label>
+                        <div class="input-group">
+                            <InputNumber @bind-Value="vendedor.CommissionPct" class="form-control" placeholder="0" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        
+                        <label class="form-label fw-bold small">Ventas Actuales (YTD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <InputNumber @bind-Value="vendedor.SalesYtd" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-2 border-top pt-4">
+                    <button type="button" class="btn btn-secondary px-4 shadow-sm d-flex align-items-center gap-2" @onclick="Volver">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm d-flex align-items-center gap-2">
+                        <i class="bi bi-floppy-fill"></i> Guardar
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private SalesPerson vendedor = new SalesPerson();
+
+    private async Task GuardarVendedor()
+    {
+       
+        var exito = await SalesPersonService.CreateAsync(vendedor);
+        if (exito)
+        {
+            NavigationManager.NavigateTo("/sales-people");
+        }
+    }
+
+    private void Volver() => NavigationManager.NavigateTo("/sales-people");
+}
