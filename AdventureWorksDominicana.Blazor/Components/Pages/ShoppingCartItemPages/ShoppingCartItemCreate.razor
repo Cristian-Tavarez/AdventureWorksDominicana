@@ -1,19 +1,24 @@
 ﻿@page "/ShoppingCartItem/Create";
+
+@using Microsoft.EntityFrameworkCore;
+@using AdventureWorksDominicana.Data.Context;
+
 @inject ShoppingCartItemService shoppingCartitemService;
 @inject ToastService toastService;
 @inject NavigationManager navigationManager;
+@inject Contexto contexto
 
 <EditForm Model="ShoppingCartItem" FormName="crearShoppingCartItem" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="container">
         <div class="card shadow-lg">
             <div class="card-header d-flex justify-content-between">
-                <h3>Crear Shopping Cart Item</h3>
+                <h4>Crear Shopping Cart Item</h4>
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label class="form-label"><strong>Fecha de creaci&oacute;n (y modificai&oacute;n)</strong></label>
-                    <input class="form-control" type="datetime-local" @bind-value="ShoppingCartItem.DateCreated" disabled />
+                    <label class="form-label"><strong>Fecha de creaci&oacute;n (y modificaci&oacute;n)</strong></label>
+                    <input class="form-control" type="datetime-local" @bind-value="ShoppingCartItem.DateCreated"/>
                     <ValidationMessage For="(() => ShoppingCartItem.DateCreated)" />
                 </div>
                 <div class="mb-3">
@@ -48,13 +53,29 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ShoppingCartItem.ModifiedDate = DateTime.Now;
+        ShoppingCartItem.DateCreated = DateTime.Now;
+        ShoppingCartItem.ModifiedDate = ShoppingCartItem.DateCreated;
+
+        try
+        {
+            var productos = await contexto.Products.ToListAsync();
+            ListaProductos = productos?.ToList() ?? new List<Product>();
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError("Ha ocurrido un error al cargar los productos.");
+            ListaProductos = new List<Product>();
+        }
     }
 
     public async Task Guardar()
     {
-        ShoppingCartItem.ModifiedDate = ShoppingCartItem.DateCreated;
-        //Asignar el producto a partir de su ID
+        ShoppingCartItem.Product = ListaProductos.FirstOrDefault(p => p.ProductId == ShoppingCartItem.ProductId);
+        if (ShoppingCartItem.Product == null)
+        {
+            toastService.ShowError("Producto no encontrado en la lista. Seleccione un producto válido.");
+            return;
+        }
         bool guardado = await shoppingCartitemService.Guardar(ShoppingCartItem);
         if (guardado)
         {
