@@ -87,7 +87,8 @@ namespace AdventureWorksDominicana.Services
         {
             var currentSalesIds = await _context.SalesPeople.Select(s => s.BusinessEntityId).ToListAsync();
             return await _context.Employees
-                .Include(e => e.BusinessEntity) 
+                .Include(e => e.BusinessEntity)
+                .ThenInclude(p => p.EmailAddresses)
                 .Where(e => !currentSalesIds.Contains(e.BusinessEntityId))
                 .Take(20)
                 .ToListAsync();
