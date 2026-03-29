@@ -49,6 +49,12 @@ public class StateProvinceService(IDbContextFactory<Contexto> DbFactory) : IServ
         return await contexto.StateProvinces.FirstOrDefaultAsync(s => s.StateProvinceId == id);
     }
 
+    public async Task<bool> BuscarRepetido(string codigo, int id, string codigoPais)
+    {
+        await using var contexto = await DbFactory.CreateDbContextAsync();
+        return await contexto.StateProvinces.AnyAsync(s => s.StateProvinceCode.ToLower().Equals(codigo) && s.StateProvinceId != id && s.CountryRegionCode.ToLower().Equals(codigoPais));
+    }
+
     public async Task<bool> Eliminar(int id)
     {
         await using var contexto = await DbFactory.CreateDbContextAsync();
