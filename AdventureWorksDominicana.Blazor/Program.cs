@@ -32,7 +32,11 @@ builder.Services.AddScoped<SalesTerritoryService>();
 builder.Services.AddScoped<VendorService>();
 builder.Services.AddScoped<ProductDescriptionService>();
 builder.Services.AddScoped<ShoppingCartItemService>();
-
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProductModelService>();
+builder.Services.AddScoped<UnitMeasureService>();
+builder.Services.AddScoped<ProductSubcategoryService>();
+builder.Services.AddScoped<StateProvinceService>();
 
 builder.Services.AddScoped<ProductReviewService>();
 builder.Services.AddScoped<SalesPersonService>();
