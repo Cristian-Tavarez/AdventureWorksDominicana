@@ -1,0 +1,98 @@
+﻿@page "/Customer/Index"
+@using AdventureWorksDominicana.Data.Models
+@using AdventureWorksDominicana.Data.Context
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject Contexto contexto
+@inject AdventureWorksDominicana.Services.CustomerService customerService
+@inject ToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime JS
+
+<h3>Customers</h3>
+
+<div class="mb-3 d-flex justify-content-between">
+    <div>
+        <input class="form-control" style="width:300px;" placeholder="Buscar por persona, tienda..." @bind="searchTerm" />
+    </div>
+    <div>
+        <a class="btn btn-primary" href="/Customer/Create">Crear Customer</a>
+    </div>
+</div>
+
+@if (customers == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!customers.Any())
+{
+    <p>No se encontraron customers.</p>
+}
+else
+{
+    <QuickGrid Items="FilteredCustomers" PageSize="10" class="table-responsive">
+        <Columns>
+            <PropertyColumn Field="@( (Customer c) => c.CustomerId )" Title="ID" />
+            <TemplateColumn Title="Person">
+                <Template Context="c">
+                    @if (c.Person != null)
+                    {
+                        @($"{c.Person.FirstName} {c.Person.LastName}")
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </Template>
+            </TemplateColumn>
+            <TemplateColumn Title="Store">
+                <Template Context="c">@c.Store?.Name ?? "<em>—</em>"</Template>
+            </TemplateColumn>
+            <PropertyColumn Field="@( (Customer c) => c.TerritoryId )" Title="Territory" />
+            <TemplateColumn Title="Modified">
+                <Template Context="c">@c.ModifiedDate.ToString("g")</Template>
+            </TemplateColumn>
+            <TemplateColumn Title="Actions">
+                <Template Context="c">
+                    <a class="btn btn-sm btn-secondary" href="@($"/Customer/Edit/{c.CustomerId}")">Edit</a>
+                    <button class="btn btn-sm btn-danger ms-1" @onclick="() => ConfirmDelete(c.CustomerId)">Delete</button>
+                </Template>
+            </TemplateColumn>
+        </Columns>
+    </QuickGrid>
+}
+
+@code {
+    private List<Customer>? customers;
+    private string searchTerm = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            customers = await contexto.Customers
+                .Include(c => c.Person)
+                .Include(c => c.Store)
+                .OrderBy(c => c.CustomerId)
+                .ToListAsync();
+        }
+        catch (Exception)
+        {
+            toastService.ShowError("Error al cargar customers.");
+            customers = new List<Customer>();
+        }
+    }
+
+    private IEnumerable<Customer> FilteredCustomers()
+    {
+        if (customers == null) return Enumerable.Empty<Customer>();
+        if (string.IsNullOrWhiteSpace(searchTerm)) return customers;
+
+        var term = searchTerm.Trim().ToLowerInvariant();
+        return customers.Where(c =>
+            (c.Person != null && ($"{c.Person.FirstName} {c.Person.LastName}").ToLowerInvariant().Contains(term))
+            || (c.Store != null && (c.Store.Name ?? string.Empty).ToLowerInvariant().Contains(term))
+            || (c.TerritoryId.HasValue && c.TerritoryId.Value.ToString().Contains(term))
+            || c.CustomerId.ToString().Contains(term)
+        );
+    } 
+}

@@ -1,0 +1,113 @@
+﻿@page "/Customer/Edit/{id:int}"
+
+@using AdventureWorksDominicana.Data.Models
+@using AdventureWorksDominicana.Data.Context
+@inject CustomerService customerService
+@inject ToastService toastService
+@inject NavigationManager navigationManager
+@inject Contexto contexto
+
+<h3>Edit Customer</h3>
+
+@if (Customer == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="Customer" OnValidSubmit="Guardar">
+        <DataAnnotationsValidator />
+        <div class="card">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Person</label>
+                    <InputSelect class="form-select" @bind-Value="Customer.PersonId">
+                        <option value="">-- Select person --</option>
+                        @foreach (var p in people)
+                        {
+                            <option value="@p.BusinessEntityId">@p.BusinessEntityId - @p.Person?.FirstName @p.Person?.LastName</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Store</label>
+                    <InputSelect class="form-select" @bind-Value="Customer.StoreId">
+                        <option value="">-- Select store --</option>
+                        @foreach (var s in stores)
+                        {
+                            <option value="@s.BusinessEntityId">@s.BusinessEntityId - @s.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Territory</label>
+                    <InputSelect class="form-select" @bind-Value="Customer.TerritoryId">
+                        <option value="">-- Select territory --</option>
+                        @foreach (var t in territories)
+                        {
+                            <option value="@t.TerritoryId">@t.TerritoryId - @t.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a class="btn btn-secondary me-2" href="/Customer/Index">Back</a>
+                <button class="btn btn-primary" type="submit">Save</button>
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+    private Customer? Customer;
+    private List<BusinessEntity> people = new();
+    private List<Store> stores = new();
+    private List<SalesTerritory> territories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            people = await contexto.People.Include(p => p.Person).OrderBy(p => p.BusinessEntityId).ToListAsync();
+            stores = await contexto.Stores.OrderBy(s => s.BusinessEntityId).ToListAsync();
+            territories = await contexto.SalesTerritories.OrderBy(t => t.TerritoryId).ToListAsync();
+
+            Customer = await customerService.Buscar(id);
+            if (Customer == null) toastService.ShowError("Customer not found.");
+        }
+        catch (Exception)
+        {
+            toastService.ShowError("Error loading data.");
+        }
+    }
+
+    private async Task Guardar()
+    {
+        if (Customer == null) return;
+        Customer.ModifiedDate = DateTime.Now;
+        try
+        {
+            var ok = await customerService.Guardar(Customer);
+            if (ok)
+            {
+                toastService.ShowSuccess("Customer updated.");
+                navigationManager.NavigateTo("/Customer/Index");
+            }
+            else
+            {
+                toastService.ShowError("Could not update customer.");
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            toastService.ShowError(ex.Message);
+        }
+        catch (Exception)
+        {
+            toastService.ShowError("Error updating customer.");
+        }
+    }
+}
