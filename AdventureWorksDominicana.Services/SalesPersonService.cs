@@ -1,5 +1,6 @@
 ﻿using AdventureWorksDominicana.Data.Context;
 using AdventureWorksDominicana.Data.Models;
+ Issue/82/Sales_Tax_Rate
 using Microsoft.EntityFrameworkCore;
 
 namespace AdventureWorksDominicana.Services
