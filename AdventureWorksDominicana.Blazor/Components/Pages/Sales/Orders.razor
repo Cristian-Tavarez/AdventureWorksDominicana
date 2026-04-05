@@ -8,6 +8,7 @@
         @*Header*@
         <div class="order-header">
             <div class="order-header-logo">
+                <i class="btn btn-primary bi bi-arrow-left" @onclick="GoToSale"></i>
                 <h4 class="card-title">Orders</h4>
             </div>
         </div>
@@ -35,6 +36,8 @@
     {
         SalesOrderHeadersList = await salesOrderHeaderService.GetList(s => true);
     }
+
+    private void GoToSale() => navigationManager.NavigateTo("/Sales");
 
     private void GoToOrderReview(int saleId) => navigationManager.NavigateTo($"Order/Review/{saleId}");
 

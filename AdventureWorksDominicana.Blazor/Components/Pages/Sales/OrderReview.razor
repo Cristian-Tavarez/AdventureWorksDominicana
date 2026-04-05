@@ -9,6 +9,7 @@
         @*Header*@
         <div class="shopping-header">
             <div class="shopping-header-logo">
+                <i class="btn btn-primary bi bi-arrow-left" @onclick="GoToOrders"></i>
                 <img src="/AdventureLogo.png" alt="AdventureWorksDominicana Logo" />
                 <h4 class="card-title">Order Review</h4>
             </div>
@@ -68,5 +69,5 @@
         SalesOrderHeaders = await salesOrderHeaderService.Buscar(SalesOrderId);
     }
 
-   
+    private void GoToOrders() => navigationManager.NavigateTo("/Orders");
 }
