@@ -14,23 +14,11 @@ namespace AdventureWorksDominicana.Services
             _context = context;
         }
 
-        public async Task<List<SalesPerson>> GetSalesPeopleAsync()
-        {
-            try
-            {
-                return await _context.SalesPeople
-                    .Include(s => s.Territory)
-                    .Include(s => s.BusinessEntity) 
-                        .ThenInclude(e => e.BusinessEntity) 
-                    .OrderByDescending(s => s.ModifiedDate)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error en GetSalesPeopleAsync: {ex.Message}");
-                return new List<SalesPerson>();
-            }
-        }
+    public async Task<List<SalesPerson>> GetList(Expression<Func<SalesPerson, bool>> criterio)
+    {
+        await using var contexto = await DbFactory.CreateDbContextAsync();
+        return await contexto.SalesPeople.Where(criterio).AsNoTracking().ToListAsync();
+    }
 
         public async Task<SalesPerson?> GetSalesPersonByIdAsync(int id)
         {
