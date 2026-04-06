@@ -66,7 +66,7 @@
                         <span>Total:</span>
                         <span>RD$@total.ToString("N2")</span>
                     </div>
-                    @if(addressId != 0 && shipMethodId != 0)
+                    @if (addressId != 0 && shipMethodId != 0)
                     {
                         <button @onclick="SaveOrder">Confirmar Orden</button>
                     }
@@ -76,14 +76,14 @@
             else
             {
                 <div class="cart-empty">
-                    <img src="/EmptyCart.png" alt="EmptyCart"/>
+                    <img src="/EmptyCart.png" alt="EmptyCart" />
                     <h3>El carrito est&aacute; vac&iacute;o</h3>
                 </div>
             }
         </div>
         @if (showModal)
         {
-            <div class="backdrop-modal" @onclick="()=> showModal = false">
+            <div class="backdrop-modal" @onclick="() => showModal = false">
                 <div class="modal-content" @onclick:stopPropagation>
                     <div class="modal-header">
                         <h1>Realización de Checkout</h1>
@@ -91,7 +91,7 @@
                     <div class="modal-body">
                         <select @bind="territoryId">
                             <option value=0>Seleccione un Territorio</option>
-                            @foreach(var t in SalesTerritoriesList)
+                            @foreach (var t in SalesTerritoriesList)
                             {
                                 <option value="@t.TerritoryId">@t.Name</option>
                             }
@@ -117,7 +117,7 @@
                                 <option value="@c.CustomerId">@c.Person?.FirstName</option>
                             }
                         </select>
-                        <input type="text" placeholder="Tarjeta Credito"/>
+                        <input type="text" placeholder="Tarjeta Credito" />
                     </div>
 
                     <div class="modal-footer d-flex justify-content-center">
@@ -172,16 +172,16 @@
         var shipBase = shipMethod?.ShipBase ?? 0;
         var shipRate = shipMethod?.ShipRate ?? 0;
         decimal weight = 0;
-        foreach(var m in ShoppingCartItemList)
+        foreach (var m in ShoppingCartItemList)
         {
-            if(m?.Product?.WeightUnitMeasureCode?.Trim() == "G")
+            if (m?.Product?.WeightUnitMeasureCode?.Trim() == "G")
                 weight += ((m?.Product?.Weight ?? 0) * (m?.Quantity ?? 0)) / 453.59237m;
             else if (m?.Product?.WeightUnitMeasureCode?.Trim() == "KG")
                 weight += ((m?.Product?.Weight ?? 0) * (m?.Quantity ?? 0)) * 2.20462262m;
             else
-                weight += (m?.Product?.Weight ?? 0) * (m?.Quantity ?? 0);   
+                weight += (m?.Product?.Weight ?? 0) * (m?.Quantity ?? 0);
         }
-        freight =shipBase + (weight * shipRate);
+        freight = shipBase + (weight * shipRate);
     }
 
     private void GetTotal() => total = (freight + subtotal + (subtotal * taxes)) - discountPct;
@@ -225,7 +225,7 @@
         var item = ShoppingCartItemList.FirstOrDefault(x => x.ShoppingCartItemId == itemId);
         if (item != null)
         {
-            if(item.Quantity != 1)
+            if (item.Quantity != 1)
                 item.Quantity -= 1;
             await shoppingCartItemService.Guardar(item);
             GetBalance();
@@ -238,7 +238,8 @@
         showModal = false;
     }
 
-    private async Task RefreshShoppingCart(){
+    private async Task RefreshShoppingCart()
+    {
         ShoppingCartItemList = await shoppingCartItemService.GetList(s => true);
         GetBalance();
     }
@@ -256,54 +257,64 @@
     private async Task SaveOrder()
     {
         SalesOrderHeader newOrder = new SalesOrderHeader
-            {
-                RevisionNumber = 0,
-                OrderDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(10),
-                ShipDate = null,
-                Status = 1,
-                OnlineOrderFlag = true,
-                SalesOrderNumber = $"SO{Random.Shared.Next()}",
-                PurchaseOrderNumber = $"PO{Random.Shared.Next()}",
-                AccountNumber = null,
-                CustomerId = customerId,
-                SalesPersonId = null,
-                TerritoryId = territoryId,
-                BillToAddressId = addressId,
-                ShipToAddressId = addressId,
-                ShipMethodId = shipMethodId,
-                CreditCardId = null,
-                CreditCardApprovalCode = null,
-                CurrencyRateId = null,
-                SubTotal = subtotal,
-                TaxAmt = taxes,
-                Freight = freight,
-                TotalDue = total,
-                Comment = null,
-                Rowguid = Guid.NewGuid(),
-                ModifiedDate = DateTime.Now
-            };
-        foreach(var s in ShoppingCartItemList)
+        {
+            RevisionNumber = 0,
+            OrderDate = DateTime.Now,
+            DueDate = DateTime.Now.AddDays(10),
+            ShipDate = null,
+            Status = 1,
+            OnlineOrderFlag = true,
+            SalesOrderNumber = $"SO{DateTime.Now:yyyyMMddHHmmss}{Random.Shared.Next(1000, 9999)}",
+            PurchaseOrderNumber = $"PO{DateTime.Now:yyyyMMddHHmmss}{Random.Shared.Next(1000, 9999)}",
+            AccountNumber = null,
+            CustomerId = customerId,
+            SalesPersonId = null,
+            TerritoryId = territoryId,
+            BillToAddressId = addressId,
+            ShipToAddressId = addressId,
+            ShipMethodId = shipMethodId,
+            CreditCardId = null,
+            CreditCardApprovalCode = null,
+            CurrencyRateId = null,
+            SubTotal = subtotal,
+            TaxAmt = taxes,
+            Freight = freight,
+            TotalDue = total,
+            Comment = null,
+            Rowguid = Guid.NewGuid(),
+            ModifiedDate = DateTime.Now
+        };
+        // Obtener el SpecialOffer "No Discount" (generalmente ID = 1)
+        const int noDiscountSpecialOfferId = 1;
+
+        foreach (var s in ShoppingCartItemList)
         {
             var offer = s.Product?.SpecialOfferProducts?
                 .Select(x => x.SpecialOffer)
                 .Where(o => o.StartDate <= DateTime.Now && o.EndDate >= DateTime.Now)
                 .OrderByDescending(o => o.DiscountPct)
                 .FirstOrDefault();
-            newOrder.SalesOrderDetails.Add(
-                new SalesOrderDetail
-                {
-                    CarrierTrackingNumber = null,
-                    OrderQty = Convert.ToInt16(s.Quantity),
-                    ProductId = s.ProductId,
-                    SpecialOfferId = offer?.SpecialOfferId ?? 0,
-                    UnitPrice = s?.Product?.ListPrice ?? 0,
-                    UnitPriceDiscount = ((s?.Quantity ?? 0) * (s?.Product?.ListPrice ?? 0)) - (((s?.Quantity ?? 0) * (s?.Product?.ListPrice ?? 0)) * offer?.DiscountPct ?? 0),
-                    LineTotal = total,
-                    Rowguid = Guid.NewGuid(),
-                    ModifiedDate = DateTime.Now
-                }
-            );
+
+            // Asignar SpecialOfferId válido (1 si no hay oferta)
+            var specialOfferId = offer?.SpecialOfferId ?? noDiscountSpecialOfferId;
+            var discountPct = offer?.DiscountPct ?? 0;
+            var unitPrice = s?.Product?.ListPrice ?? 0;
+            var quantity = s?.Quantity ?? 0;
+            var unitPriceDiscount = unitPrice * discountPct;
+            var lineTotal = quantity * (unitPrice - unitPriceDiscount);
+
+            newOrder.SalesOrderDetails.Add(new SalesOrderDetail
+            {
+                CarrierTrackingNumber = null,
+                OrderQty = Convert.ToInt16(quantity),
+                ProductId = s.ProductId,
+                SpecialOfferId = specialOfferId,
+                UnitPrice = unitPrice,
+                UnitPriceDiscount = unitPriceDiscount,
+                LineTotal = lineTotal,
+                Rowguid = Guid.NewGuid(),
+                ModifiedDate = DateTime.Now
+            });
         }
         try
         {
@@ -314,10 +325,11 @@
             {
                 await shoppingCartItemService.Eliminar(s.ShoppingCartItemId);
             }
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             toastService.ShowSuccess("No se creo la orden correctamente");
-            Console.WriteLine(ex.Message);
-        } 
+            //Console.WriteLine(ex.Message);
+        }
     }
 }
