@@ -1,7 +1,5 @@
 ﻿@page "/Account/RegisterConfirmation"
-@attribute [AllowAnonymous]
-
-@using System.ComponentModel.DataAnnotations
+@using System.Text
 @using Microsoft.AspNetCore.Identity
 @using AdventureWorksDominicana.Data.Models
 
@@ -9,20 +7,54 @@
 @inject NavigationManager NavigationManager
 @inject IEmailSender<AspNetUser> EmailSender
 
-<PageTitle>Confirmar Registro</PageTitle>
+<PageTitle>Confirmar Registro | AdventureWorks</PageTitle>
 
-<h1>Confirmar tu correo</h1>
+<div class="aw-auth-wrapper">
+    <div class="aw-circle-deco deco-1"></div>
+    <div class="aw-circle-deco deco-2"></div>
 
-<div class="row">
-    <div class="col-md-6">
-        @if (Email is null)
-        {
-            <p>Error: No se proporcionó un correo electrónico válido para confirmar.</p>
-        }
-        else
-        {
-            <p>Hemos enviado un código de 6 dígitos a <strong>@Email</strong>. Por favor, ingrésalo a continuación para activar tu cuenta:</p>
+    <div class="aw-auth-card aw-centered-card text-center">
+        <div class="aw-auth-login-col">
+            
+            <div class="aw-success-icon-container">
+                <i class="bi bi-rocket-takeoff aw-success-icon"></i>
+            </div>
+            
+            <h2 class="aw-auth-title">¡Casi <span>Listo</span>!</h2>
+            
+            <StatusMessage Message="@statusMessage" />
 
+            @if (emailConfirmationLink is not null)
+            {
+                <div class="aw-alert-dev">
+                    <p class="aw-auth-subtitle">
+                        <i class="bi bi-exclamatation-triangle"></i> <strong>Modo Desarrollo:</strong> Tu app no tiene un servidor de correos real.
+                    </p>
+                    <a href="@emailConfirmationLink" class="aw-btn-login text-decoration-none">
+                        Confirmar Cuenta Aquí <i class="bi bi-shield-check"></i>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <p class="aw-auth-subtitle" style="margin-bottom: 35px;">
+                    Te hemos enviado un enlace de confirmación a tu correo. Por favor, revisa tu bandeja de entrada para activar tu cuenta.
+                </p>
+                
+                <a href="https://mail.google.com/" target="_blank" class="aw-btn-login text-decoration-none">
+                    Ir a mi Correo <i class="bi bi-google"></i>
+                </a>
+            }
+
+            <div class="aw-back-link">
+                <a href="Account/Login" class="aw-forgot-link">
+                    <i class="bi bi-arrow-left-short"></i> Volver al inicio de sesión
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
 
             @if (EmailSender.GetType().Name == "IdentityNoOpEmailSender" && !string.IsNullOrEmpty(DevCode))
             {
@@ -100,23 +132,17 @@
 
         if (isTokenValid)
         {
-            // Codigo Correcto
-            user.EmailConfirmed = true;
-            await UserManager.UpdateAsync(user);
-            
-            // Redirigir a login cuando se confirme el codigo
-            NavigationManager.NavigateTo("/Account/Login");
+            HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            statusMessage = "Error: No se encontró el usuario para el correo especificado.";
         }
         else
         {
-            ErrorMessage = "El código ingresado es incorrecto o ha expirado. Por favor, verifica e intenta de nuevo.";
+            var userId = await UserManager.GetUserIdAsync(user);
+            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            emailConfirmationLink = NavigationManager.GetUriWithQueryParameters(
+                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
         }
-    }
-
-    private sealed class InputModel
-    {
-        [Required(ErrorMessage = "Debes ingresar el código de verificación.")]
-        [StringLength(6, MinimumLength = 6, ErrorMessage = "El código debe tener exactamente 6 dígitos.")]
-        public string Code { get; set; } = "";
     }
 }
