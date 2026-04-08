@@ -1,5 +1,5 @@
 ﻿@page "/ProductVendor/Index"
-
+@attribute [Authorize(Roles = "Admin")]
 @inject NavigationManager navigationManager
 @inject ProductVendorService productVendorService
 @rendermode InteractiveServer
