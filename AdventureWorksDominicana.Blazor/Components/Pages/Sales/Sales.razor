@@ -1,8 +1,6 @@
 ﻿@page "/Sales/"
-
 @attribute [Authorize(Roles = "Customer, Admin")]
 @rendermode InteractiveServer
-
 @inject ProductService productService
 @inject ShoppingCartItemService shoppingCartItemService
 @inject ToastService toastService
@@ -78,17 +76,19 @@
 </div>
 @code {
     private List<Product> ProductList = new List<Product>();
-    private int shoppingCount = 0;
-    private string Filtro = string.Empty, ValorFiltro = string.Empty;
     private List<Product> PagedProducts = new List<Product>();
 
+    private string Filtro = string.Empty, ValorFiltro = string.Empty;
+    private string? UserEmail { get; set; }
+
+    private int shoppingCount = 0;
     private int CurrentPage = 1;
     private int PageSize = 12;
     private int TotalPaginas => (int)Math.Ceiling((double)ProductList.Count / PageSize);
 
     private ClaimsPrincipal? User { get; set; }
     private bool IsAuthenticated { get; set; }
-    private string? UserEmail { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,13 +96,9 @@
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         User = authState.User;
         IsAuthenticated = User.Identity?.IsAuthenticated ?? false;
-        
         if (IsAuthenticated)
-        {
             UserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-        }
-
-        ProductList = await productService.GetList(p => true);
+        ProductList = await productService.GetList(p => p.ProductInventories.Any(q => q.Quantity > 0));
         ActualizarVista();
         await CountProductsShopping();
     }
@@ -117,6 +113,7 @@
     {
         try
         {
+            if (UserEmail == null) return;
             var creado = await shoppingCartItemService.Guardar(
             new ShoppingCartItem
             {
@@ -129,9 +126,13 @@
             toastService.ShowSuccess("Producto añadido al carrito");
             await CountProductsShopping();
         }
+        catch(InvalidOperationException ex)
+        {
+            toastService.ShowWarning(ex.Message);
+        }
         catch (Exception ex)
         {
-            toastService.ShowSuccess("Producto no pudo ser añadido al carrito");
+            toastService.ShowError("Producto no pudo ser añadido al carrito");
             Console.WriteLine(ex.Message);
         }
     }
@@ -166,10 +167,8 @@
     {
         var value = e?.Value?.ToString();
         Expression<Func<Product, bool>> criterio = e => true;
-        if (value?.Trim() != "")
-        {
-            criterio = criterio.And(e => e.Name.ToLower().Contains(value.ToLower()) || e.ProductSubcategory.ProductCategory.Name.ToLower().Contains(value.ToLower()));
-        }
+        if (value?.Trim() != "" && value != null)
+            criterio = criterio.And(e => e.Name.Contains(value) || (e.ProductSubcategory != null && e.ProductSubcategory.ProductCategory != null && e.ProductSubcategory.ProductCategory.Name.Contains(value)));
         ProductList = await productService.GetList(criterio);
         ActualizarVista();
     }
