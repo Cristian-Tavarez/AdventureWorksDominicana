@@ -25,6 +25,7 @@
             </div>
         </div>
         <div class="card-body">
+            @*Filters*@
             <div class="sale-input">
                 <div class="input-group">
                     <input class="form-control" placeholder="buscar producto" @oninput="Buscar" />
@@ -37,6 +38,7 @@
                     <i class="btn btn-primary bi bi-filter"></i>
                 </div>
             </div>
+            @*Product List*@
             <div class="sale-products">
                 @foreach (var p in PagedProducts)
                 {

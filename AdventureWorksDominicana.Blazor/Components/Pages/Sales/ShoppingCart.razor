@@ -5,7 +5,6 @@
 @inject ShoppingCartItemService shoppingCartItemService
 @inject SalesOrderHeaderService salesOrderHeaderService
 @inject AddressService addressService
-@inject SalesTerritoryService salesTerritoryService
 @inject CurrencyService currencyService
 @inject CustomerService customerService
 @inject CreditCardService creditCardService
@@ -75,11 +74,7 @@
                         <span>Total:</span>
                         <span>RD$@total.ToString("N2")</span>
                     </div>
-                    @if (addressId != 0 && shipMethodId != 0)
-                    {
-                        <button @onclick="SaveOrder">Confirmar Orden</button>
-                    }
-                    <button @onclick="() => showModal = true">Realizar Checkout</button>
+                    <a href="/Checkout" class="btn btn-primary">Checkout</a>
                 </div>
             }
             else
@@ -90,51 +85,7 @@
                 </div>
             }
         </div>
-        @if (showModal)
-        {
-            <div class="backdrop-modal" @onclick="() => showModal = false">
-                <div class="modal-content" @onclick:stopPropagation>
-                    <div class="modal-header">
-                        <h1>Realización de Checkout</h1>
-                    </div>
-                    <div class="modal-body">
-                        <select @bind="territoryId">
-                            <option value=0>Seleccione un Territorio</option>
-                            @foreach (var t in SalesTerritoriesList)
-                            {
-                                <option value="@t.TerritoryId">@t.Name</option>
-                            }
-                        </select>
-                        <select @bind="addressId">
-                            <option value=0>Seleccione una direcciones de envio</option>
-                            @foreach (var a in AddressesList)
-                            {
-                                <option value="@a.AddressId">@a.AddressLine1 - @a.City - @a.StateProvince.Name</option>
-                            }
-                        </select>
-                        <select @bind="shipMethodId">
-                            <option value=0>Seleccione una metodo de envio</option>
-                            @foreach (var s in ShipMethodsList)
-                            {
-                                <option value="@s.ShipMethodId">@s.Name</option>
-                            }
-                        </select>
-                        <select @bind="currencyRateId">
-                            <option value="">Seleccione una moneda de cambio</option>
-                            @foreach (var c in CurrenciesList)
-                            {
-                                <option value="@c.CurrencyCode">@c.Name</option>
-                            }
-                        </select>
-                        <input type="text" placeholder="Tarjeta Credito" />
-                    </div>
-
-                    <div class="modal-footer d-flex justify-content-center">
-                        <button class="btn btn-primary" @onclick="setCompletedCheckout">Guardar</button>
-                    </div>
-                </div>
-            </div>
-        }
+        
     </div>
     
 </div>
@@ -175,7 +126,7 @@
         userCurrent = await customerService.GetList(u => u.Person.EmailAddresses.Any(p => p.EmailAddress1 == UserEmail));
         AddressesList = await addressService.GetList(s => true);
         CurrenciesList = await currencyService.GetList(s => true);
-        SalesTerritoriesList = await salesTerritoryService.GetList(s => true);
+      
         CreditCardsList = await creditCardService.GetList(s => true);
         ShipMethodsList = await shipMethodService.GetList(s => true);
         GetBalance();

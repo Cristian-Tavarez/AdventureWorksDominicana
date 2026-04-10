@@ -26,7 +26,10 @@
                             <small class="text-muted">
                                 @(s.ShipDate?.ToString("dd MMM yyyy") ?? "Sin fecha")
                             </small>
-                            <button class="btn btn-primary" @onclick="()=>ChangeCancelOrder(s)">Cancelar</button>
+                            @if (s.Status != 4)
+                            {
+                                <button class="btn btn-primary" @onclick="()=>ChangeCancelOrder(s)">Cancelar</button>
+                            }
                             <span class="badge @(s.Status == 1 ? "bg-warning text-dark" : "bg-danger")">
                                 @(s.Status == 1 ? "En proceso" : s.Status == 2 ? "Enviando" : s.Status == 3 ? "Completada" : "Cancelada")
                             </span>
@@ -80,15 +83,21 @@
     private async Task RefreshStatus(){
         foreach(var s in SalesOrderHeadersList)
         {
-            if (s.ShipDate == null) return;
-            if (DateTime.Today == s.ShipDate.Value.Date)
-                s.Status = 2;
-            if (DateTime.Today > s.ShipDate.Value.Date.AddDays(5))
-                s.Status = 3;
             try
             {
-                await salesOrderHeaderService.Guardar(s);
-            }catch(Exception ex)
+                if (s.ShipDate == null) return;
+                if (DateTime.Today == s.ShipDate.Value.Date)
+                {
+                    s.Status = 2;
+                    await salesOrderHeaderService.Guardar(s);
+                }
+                if (DateTime.Today > s.ShipDate.Value.Date.AddDays(5))
+                {
+                    s.Status = 3;
+                    await salesOrderHeaderService.Guardar(s);
+                }
+            }
+            catch (Exception ex)
             {
                 toastService.ShowError("Estados de orden no pudieron ser actualizados");
             }

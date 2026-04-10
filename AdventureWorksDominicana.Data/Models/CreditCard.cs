@@ -24,22 +24,26 @@ public partial class CreditCard
     /// Credit card name.
     /// </summary>
     [StringLength(50)]
+    [Required(ErrorMessage = "Campo Obligatorio")]
     public string CardType { get; set; } = null!;
 
     /// <summary>
     /// Credit card number.
     /// </summary>
     [StringLength(25)]
+    [Required(ErrorMessage = "Campo Obligatorio")]
     public string CardNumber { get; set; } = null!;
 
     /// <summary>
     /// Credit card expiration month.
     /// </summary>
+    /// [Required(ErrorMessage = "Campo Obligatorio")]
     public byte ExpMonth { get; set; }
 
     /// <summary>
     /// Credit card expiration year.
     /// </summary>
+    [Required(ErrorMessage = "Campo Obligatorio")]
     public short ExpYear { get; set; }
 
     /// <summary>
