@@ -67,6 +67,7 @@ public class ShoppingCartItemService(IDbContextFactory<Contexto> DbFactory) : IS
          .Include(p => p.Product).ThenInclude(s => s.SpecialOfferProducts).ThenInclude(s => s.SpecialOffer)
          .Include(p => p.Product).ThenInclude(i => i.ProductInventories)
          .Include(p => p.Product).ThenInclude(p => p.ProductModel).ThenInclude(d => d.ProductModelProductDescriptionCultures).ThenInclude(d => d.ProductDescription)
-         .AsNoTracking().Where(criterio).ToListAsync();
+         .Include(p => p.Product).ThenInclude(p => p.ProductProductPhotos).ThenInclude(p => p.ProductPhoto)
+         .Where(criterio).ToListAsync();
     }
 }
