@@ -13,28 +13,34 @@
 <div class="">
     <div class="sale-container">
         @*Header*@
-        <div class="sale-header">
-            <div class="sale-header-logo">
-                <img src="/AdventureLogo.png" alt="AdventureWorksDominicana Logo" />
-                <h4 class="card-title">AdventureWorksDominicana</h4>
+        <div class="sale-topbar">
+
+            <div class="sale-topbar-left">
+                <h5>Tienda</h5>
+                <span>Explora productos disponibles</span>
             </div>
-            <div class="sale-header-actions">
-                <a href="Orders">Orders</a>
-                <a href="ShoppingCart" class="btn btn-primary shopping-cart-container">
+
+            <div class="sale-topbar-right">
+                <a href="Orders" class="btn-outline">
+                    <i class="bi bi-bag"></i> Mis pedidos
+                </a>
+
+                <a href="ShoppingCart" class="btn-primary shopping-cart-container">
                     <i class="bi bi-cart"></i>
                     <span>@shoppingCount</span>
                 </a>
             </div>
+
         </div>
         <div class="card-body">
             <div class="sale-input">
                 <div class="input-group">
-                    <input class="form-control" placeholder="buscar producto" @oninput="Buscar" />
+                    <input class="form-control" placeholder="Buscar producto..." @oninput="Buscar" />
                     <i class="btn btn-primary bi bi-search"></i>
                 </div>
                 <div class="input-group">
                     <select class="form-select">
-                        <option>Por Categoria</option>
+                        <option value="" hidden selected disabled>Por Categoria</option>
                     </select>
                     <i class="btn btn-primary bi bi-filter"></i>
                 </div>
@@ -79,8 +85,6 @@
 @code {
     private List<Product> ProductList = new List<Product>();
     private int shoppingCount = 0;
-    private PaginationState pages = new PaginationState { ItemsPerPage = 5 };
-    private DateTime? StartDate = DateTime.Today, EndDate = DateTime.Today;
     private string Filtro = string.Empty, ValorFiltro = string.Empty;
     private List<Product> PagedProducts = new List<Product>();
 
@@ -109,6 +113,8 @@
         await CountProductsShopping();
     }
 
+    private async Task GoToProductDetail(int id) => navigationManager.NavigateTo("/Product/Detail/" + id);
+
     private async Task CountProductsShopping()
     {
         var productsShoppingList = await shoppingCartItemService.GetList(s => s.ShoppingCartId.Trim().ToLower().Equals(UserEmail));
@@ -134,6 +140,7 @@
         catch (Exception ex)
         {
             toastService.ShowSuccess("Producto no pudo ser añadido al carrito");
+            Console.WriteLine(ex.Message);
         }
     }
 
@@ -167,12 +174,11 @@
     {
         var value = e?.Value?.ToString();
         Expression<Func<Product, bool>> criterio = e => true;
-        if (value.Trim() != "")
+        if (value?.Trim() != "")
         {
             criterio = criterio.And(e => e.Name.ToLower().Contains(value.ToLower()) || e.ProductSubcategory.ProductCategory.Name.ToLower().Contains(value.ToLower()));
         }
         ProductList = await productService.GetList(criterio);
         ActualizarVista();
-
     }
 }
