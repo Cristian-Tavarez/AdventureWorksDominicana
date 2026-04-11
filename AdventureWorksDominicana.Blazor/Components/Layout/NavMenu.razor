@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
+﻿@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 
 <div class="top-row navbar navbar-dark">
     <div class="container-fluid">
@@ -12,172 +13,189 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        
-        @* ========== HOME (Todos) ========== *@
+
+        @* ================= HOME ================= *@
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu"></span> <small>Home</small>
+            <NavLink class="nav-link d-flex align-items-center" href="/Home/Page" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu me-2"></span>
+                <small>Home</small>
             </NavLink>
         </div>
 
-       
-        <AuthorizeView Context="authContext">
+        @* ================= ADMIN ================= *@
+        <AuthorizeView Roles="Admin">
             <Authorized>
-                
-                @* ========== SALES (Customer y Admin) ========== *@
-                <AuthorizeView Roles="Customer, Admin" Context="salesContext">
-                    <Authorized>
-                        <div class="accordion px-3 nav-item" id="accordionSales">
-                            <div class="accordion-item bg-transparent border-0">
-                                <div class="accordion-header">
-                                    <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSales">
-                                        <span class="bi bi-cart-fill-nav-menu"></span> <small>Sales</small>
-                                    </button>
-                                </div>
-                                <div id="collapseSales" class="accordion-collapse collapse" data-bs-parent="#accordionSales">
-                                    <div class="accordion-body p-0 ps-3">
-                                        <div class="nav-item pt-2"><NavLink class="nav-link" href="/Sales"><small>Sales</small></NavLink></div>
-                                        
-                                        @* Solo el Admin ve Territories y Currencies *@
-                                        <AuthorizeView Roles="Admin" Context="adminSalesContext">
-                                            <Authorized>
-                                                <div class="nav-item"><NavLink class="nav-link" href="/SalesTerritory/Index"><small>Sales Territories</small></NavLink></div>
-                                                <div class="nav-item"><NavLink class="nav-link" href="/Currency/Index"><small>Currencies</small></NavLink></div>
-                                            </Authorized>
-                                        </AuthorizeView>
 
-                                        <div class="nav-item"><NavLink class="nav-link" href="/ShoppingCartItem/Index"><small>Shopping Cart</small></NavLink></div>
-                                    </div>
-                                </div>
+                @* SALES *@
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#salesAdmin">
+                            <span class="bi bi-cart-fill-nav-menu me-2"></span> <small>Sales</small>
+                        </button>
+                        <div id="salesAdmin" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/Sales"><span class="bi bi-receipt-nav-menu me-2"></span><small>Sales</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/TransactionHistory/Index"><span class="bi bi-clock-history-nav-menu me-2"></span><small>Transactions</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/SalesTerritory/Index"><span class="bi bi-map-fill-nav-menu me-2"></span><small>Territories</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/Currency/Index"><span class="bi bi-currency-dollar-nav-menu me-2"></span><small>Currencies</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/CurrencyRate/Index"><span class="bi bi-currency-exchange-nav-menu me-2"></span><small>Rates</small></NavLink>
                             </div>
                         </div>
-                    </Authorized>
-                </AuthorizeView>
+                    </div>
+                </div>
 
-                @* ========== PRODUCTS (Vendor y Admin) ========== *@
-                <AuthorizeView Roles="Vendor, Admin" Context="productContext">
-                    <Authorized>
-                        <div class="accordion px-3 nav-item" id="accordionProducts">
-                            <div class="accordion-item bg-transparent border-0">
-                                <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducts">
-                                    <span class="bi bi-bicycle-nav-menu"></span> <small>Products</small>
-                                </button>
-                                <div id="collapseProducts" class="accordion-collapse collapse" data-bs-parent="#accordionProducts">
-                                    <div class="accordion-body p-0 ps-3">
-                                        <div class="nav-item pt-2"><NavLink class="nav-link" href="/Product/Index"><small>Products</small></NavLink></div>
-                                        <div class="nav-item"><NavLink class="nav-link" href="/ProductCategory/Index"><small>Categories</small></NavLink></div>
-                                        
-                                        <AuthorizeView Roles="Admin" Context="adminProdContext">
-                                            <Authorized>
-                                                <div class="nav-item"><NavLink class="nav-link" href="/ProductDescription/Index"><small>Descriptions</small></NavLink></div>
-                                                <div class="nav-item"><NavLink class="nav-link" href="/Culture/Index"><small>Cultures</small></NavLink></div>
-                                                <div class="nav-item"><NavLink class="nav-link" href="/Location/Index"><small>Locations</small></NavLink></div>
-                                            </Authorized>
-                                        </AuthorizeView>
-                                    </div>
-                                </div>
+                @* PRODUCTS *@
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#productsAdmin">
+                            <span class="bi bi-bicycle-nav-menu me-2"></span> <small>Products</small>
+                        </button>
+                        <div id="productsAdmin" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/Product/Index"><span class="bi bi-box-seam-nav-menu me-2"></span><small>Products</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/ProductCategory/Index"><span class="bi bi-folder-nav-menu me-2"></span><small>Categories</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/ProductDescription/Index"><span class="bi bi-file-text-nav-menu me-2"></span><small>Descriptions</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/Culture/Index"><span class="bi bi-translate-nav-menu me-2"></span><small>Cultures</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/Location/Index"><span class="bi bi-pin-map-nav-menu me-2"></span><small>Locations</small></NavLink>
                             </div>
                         </div>
-                    </Authorized>
-                </AuthorizeView>
+                    </div>
+                </div>
 
-                @* ========== GEOGRAPHY (Solo Admin) ========== *@
-                <AuthorizeView Roles="Admin" Context="geoContext">
-                    <Authorized>
-                        <div class="accordion px-3 nav-item" id="accordionGeography">
-                            <div class="accordion-item bg-transparent border-0">
-                                <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeography">
-                                    <span class="bi bi-globe-americas-nav-menu"></span> <small>Geography</small>
-                                </button>
-                                <div id="collapseGeography" class="accordion-collapse collapse" data-bs-parent="#accordionGeography">
-                                    <div class="accordion-body p-0 ps-3">
-                                        <div class="nav-item pt-2"><NavLink class="nav-link" href="/CountryRegions/Index"><small>Countries/Regions</small></NavLink></div>
-                                        <div class="nav-item"><NavLink class="nav-link" href="/StateProvince/Index"><small>States/Provinces</small></NavLink></div>
-                                    </div>
-                                </div>
+                @* GEOGRAPHY *@
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#geoAdmin">
+                            <span class="bi bi-globe-americas-nav-menu me-2"></span> <small>Geography</small>
+                        </button>
+                        <div id="geoAdmin" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/CountryRegions/Index"><span class="bi bi-flag-fill-nav-menu me-2"></span><small>Countries</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/StateProvince/Index"><span class="bi bi-building-fill-nav-menu me-2"></span><small>States</small></NavLink>
                             </div>
                         </div>
-                    </Authorized>
-                </AuthorizeView>
+                    </div>
+                </div>
 
-                @* ========== HUMAN RESOURCES (Solo Admin) ========== *@
-                <AuthorizeView Roles="Admin" Context="hrContext">
-                    <Authorized>
-                        <div class="accordion px-3 nav-item" id="accordionHR">
-                            <div class="accordion-item bg-transparent border-0">
-                                <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHR">
-                                    <span class="bi bi-people-fill-nav-menu"></span> <small>Human Resources</small>
-                                </button>
-                                <div id="collapseHR" class="accordion-collapse collapse" data-bs-parent="#accordionHR">
-                                    <div class="accordion-body p-0 ps-3">
-                                        <div class="nav-item pt-2"><NavLink class="nav-link" href="/Employee/Index"><small>Employees</small></NavLink></div>
-                                        <div class="nav-item"><NavLink class="nav-link" href="/Department/Index"><small>Departments</small></NavLink></div>
-                                        <div class="nav-item"><NavLink class="nav-link" href="/Person/Index"><small>Person</small></NavLink></div>
-                                    </div>
-                                </div>
+                @* HUMAN RESOURCES *@
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#hrAdmin">
+                            <span class="bi bi-people-fill-nav-menu me-2"></span> <small>Human Resources</small>
+                        </button>
+                        <div id="hrAdmin" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/Employee/Index"><span class="bi bi-person-badge-nav-menu me-2"></span><small>Employees</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/Department/Index"><span class="bi bi-building-nav-menu me-2"></span><small>Departments</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/Person/Index"><span class="bi bi-person-add-nav-menu me-2"></span><small>Person</small></NavLink>
                             </div>
                         </div>
-                    </Authorized>
-                </AuthorizeView>
+                    </div>
+                </div>
 
-                @* ========== PURCHASING (Vendor y Admin) ========== *@
-                <AuthorizeView Roles="Vendor, Admin" Context="purchContext">
-                    <Authorized>
-                        <div class="accordion px-3 nav-item" id="accordionPurchasing">
-                            <div class="accordion-item bg-transparent border-0">
-                                <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePurchasing">
-                                    <span class="bi bi-truck-nav-menu"></span> <small>Purchasing</small>
-                                </button>
-                                <div id="collapsePurchasing" class="accordion-collapse collapse" data-bs-parent="#accordionPurchasing">
-                                    <div class="accordion-body p-0 ps-3">
-                                        <AuthorizeView Roles="Admin" Context="adminPurchContext">
-                                            <Authorized>
-                                                <div class="nav-item pt-2"><NavLink class="nav-link" href="/Vendor/Index"><small>Vendors</small></NavLink></div>
-                                            </Authorized>
-                                        </AuthorizeView>
-                                        <div class="nav-item"><NavLink class="nav-link" href="/ShipMethods"><small>Ship Methods</small></NavLink></div>
-                                    </div>
-                                </div>
+                @* PURCHASING *@
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#purchAdmin">
+                            <span class="bi bi-truck-nav-menu me-2"></span> <small>Purchasing</small>
+                        </button>
+                        <div id="purchAdmin" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/Vendor/Index"><span class="bi bi-shop-nav-menu me-2"></span><small>Vendors</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/ShipMethods"><span class="bi bi-send-plus-nav-menu me-2"></span><small>Ship Methods</small></NavLink>
                             </div>
                         </div>
-                    </Authorized>
-                </AuthorizeView>
+                    </div>
+                </div>
 
-                @* ========== CONFIGURATION (Solo Admin) ========== *@
-                <AuthorizeView Roles="Admin" Context="configContext">
-                    <Authorized>
-                        <div class="accordion px-3 nav-item" id="accordionConfig">
-                            <div class="accordion-item bg-transparent border-0">
-                                <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig">
-                                    <span class="bi bi-gear-fill-nav-menu"></span> <small>Configuration</small>
-                                </button>
-                                <div id="collapseConfig" class="accordion-collapse collapse" data-bs-parent="#accordionConfig">
-                                    <div class="accordion-body p-0 ps-3">
-                                        <div class="nav-item pt-2"><NavLink class="nav-link" href="/PhoneNumberType/Index"><small>Phone Number Types</small></NavLink></div>
-                                        <div class="nav-item"><NavLink class="nav-link" href="/ContactType/Index"><small>Contact Types</small></NavLink></div>
-                                    </div>
-                                </div>
+                @* CONFIGURATION *@
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#configAdmin">
+                            <span class="bi bi-gear-fill-nav-menu me-2"></span> <small>Configuration</small>
+                        </button>
+                        <div id="configAdmin" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/PhoneNumberType/Index"><span class="bi bi-telephone-plus-nav-menu me-2"></span><small>Phone Types</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/ContactType/Index"><span class="bi bi-person-lines-fill-nav-menu me-2"></span><small>Contact Types</small></NavLink>
                             </div>
                         </div>
-                    </Authorized>
-                </AuthorizeView>
+                    </div>
+                </div>
 
+            </Authorized>
+        </AuthorizeView>
+
+        @* ================= CUSTOMER ================= *@
+        <AuthorizeView Roles="Customer">
+            <Authorized>
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#salesCustomer">
+                            <span class="bi bi-cart-fill-nav-menu me-2"></span> <small>Sales</small>
+                        </button>
+                        <div id="salesCustomer" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/Sales"><span class="bi bi-receipt-nav-menu me-2"></span><small>Sales</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/ShoppingCart"><span class="bi bi-cart-nav-menu me-2"></span><small>Shopping Cart</small></NavLink>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        @* ================= VENDOR ================= *@
+        <AuthorizeView Roles="Vendor">
+            <Authorized>
+                <div class="accordion px-3 nav-item">
+                    <div class="accordion-item bg-transparent border-0">
+                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#vendorProducts">
+                            <span class="bi bi-bicycle-nav-menu me-2"></span> <small>Products</small>
+                        </button>
+                        <div id="vendorProducts" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ps-3">
+                                <NavLink class="nav-link d-flex align-items-center" href="/Product/Index"><span class="bi bi-box-seam-nav-menu me-2"></span><small>Products</small></NavLink>
+                                <NavLink class="nav-link d-flex align-items-center" href="/ProductCategory/Index"><span class="bi bi-folder-nav-menu me-2"></span><small>Categories</small></NavLink>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link d-flex align-items-center" href="/ShipMethods">
+                        <span class="bi bi-send-plus-nav-menu me-2"></span>
+                        <small>Ship Methods</small>
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        @* ================= LOGIN / LOGOUT ================= *@
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post" class="w-100">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="@NavigationManager.Uri" />
+                        <button type="submit"
+                                class="nav-link d-flex align-items-center w-100 border-0 bg-transparent text-start p-0">
+                            <span class="bi bi-box-arrow-right-nav-menu me-2"></span>
+                            <small>Salir</small>
+                        </button>
+                    </form>
+                </div>
             </Authorized>
 
             <NotAuthorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="/Account/Register"><small>Register</small></NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="/Account/Login"><small>Login</small></NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" href="/Account/Login">
+                        <span class="bi bi-box-arrow-in-right-nav-menu me-2"></span>
+                        <small>Login</small>
+                    </NavLink>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
-    </nav>
-</div>
-
-       
-
 
     </nav>
 </div>
