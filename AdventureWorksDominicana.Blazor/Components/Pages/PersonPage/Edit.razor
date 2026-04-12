@@ -1,5 +1,5 @@
 ﻿@page "/Person/Edit/{IdPersona:int}"
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin,HRManager")]
 
 @using AdventureWorksDominicana.Data.Models
 @using AdventureWorksDominicana.Services
