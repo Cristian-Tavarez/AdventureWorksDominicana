@@ -490,7 +490,7 @@
     {
         discountAmount = ShoppingCartItemList.Sum(p =>
         {
-            var discount = GetBestDiscountPct(p.Product);
+            var discount = GetBestDiscountPct(p);
             var totalProduct = (p?.Product?.ListPrice ?? 0) * (p?.Quantity ?? 0);
             return discount * totalProduct;
         });
@@ -840,7 +840,7 @@
     {
         foreach (var item in ShoppingCartItemList)
         {
-            var discountPct = GetBestDiscountPct(item.Product);
+            var discountPct = GetBestDiscountPct(item);
 
             var specialOfferId = item.Product?.SpecialOfferProducts?
                 .Where(x => x.SpecialOffer.DiscountPct == discountPct)
@@ -907,11 +907,13 @@
         NewBillingAddress.StateProvinceId = 0;
     }
 
-    private decimal GetBestDiscountPct(Product product)
+    private decimal GetBestDiscountPct(ShoppingCartItem item)
     {
-        return product?.SpecialOfferProducts?
+        return item?.Product?.SpecialOfferProducts?
             .Select(x => x.SpecialOffer)
             .Where(o => o.StartDate <= DateTime.Now && o.EndDate >= DateTime.Now)
+            .Where(o => o.Category == "Customer")
+            .Where(o => (item.Quantity) >= o.MinQty)
             .OrderByDescending(o => o.DiscountPct)
             .FirstOrDefault()?.DiscountPct ?? 0;
     }
