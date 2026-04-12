@@ -106,7 +106,7 @@
             <div class="accordion-item bg-transparent border-0">
                 <div class="accordion-header">
                     <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInventory">
-                        <span class="bi bi-boxes"></span> <small class="ms-2">Warehouse</small>
+                        <span class="bi bi-boxes-nav-menu"></span> <small class="ms-2">Warehouse</small>
                     </button>
                 </div>
                 <div id="collapseInventory" class="accordion-collapse collapse" data-bs-parent="#accordionInventory">
@@ -118,15 +118,13 @@
                         </div>
                         <div class="nav-item">
                             <NavLink class="nav-link" href="/Product/Inventory">
-                                <span class="bi bi-inboxes-fill"></span> <small class="ms-2">Inventory</small>
+                                <span class="bi bi-inboxes-fill-nav-menu"></span> <small class="ms-2">Inventory</small>
                             </NavLink>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
 
         @* ========== GEOGRAPHY MODULE ========== *@
         <div class="accordion px-3 nav-item" id="accordionGeography">
@@ -193,36 +191,61 @@
             </Authorized>
         </AuthorizeView>
 
-        @* ================= VENDOR ================= *@
-        <AuthorizeView Roles="Vendor">
-            <Authorized>
-                <div class="accordion px-3 nav-item">
-                    <div class="accordion-item bg-transparent border-0">
-                        <button class="accordion-button collapsed bg-transparent px-3" data-bs-toggle="collapse" data-bs-target="#vendorProducts">
-                            <span class="bi bi-bicycle-nav-menu me-2"></span> <small>Products</small>
-                        </button>
-                        <div id="vendorProducts" class="accordion-collapse collapse">
-                            <div class="accordion-body p-0 ps-3">
-                                <NavLink class="nav-link d-flex align-items-center" href="/Product/Index"><span class="bi bi-box-seam-nav-menu me-2"></span><small>Products</small></NavLink>
-                                <NavLink class="nav-link d-flex align-items-center" href="/ProductCategory/Index"><span class="bi bi-folder-nav-menu me-2"></span><small>Categories</small></NavLink>
-                            </div>
+        @* ========== CONFIGURATION MODULE ========== *@
+        <div class="accordion px-3 nav-item" id="accordionConfig">
+            <div class="accordion-item bg-transparent border-0">
+                <div class="accordion-header">
+                    <button class="accordion-button collapsed bg-transparent px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConfig">
+                        <span class="bi bi-gear-fill-nav-menu"></span> <small>Configuration</small>
+                    </button>
+                </div>
+                <div id="collapseConfig" class="accordion-collapse collapse" data-bs-parent="#accordionConfig">
+                    <div class="accordion-body p-0 ps-3">
+                        <div class="nav-item pt-2">
+                            <NavLink class="nav-link" href="/PhoneNumberType/Index">
+                                <span class="bi bi-telephone-plus-nav-menu"></span> <small>Phone Number Types</small>
+                            </NavLink>
+                        </div>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="/ContactType/Index">
+                                <span class="bi bi-person-lines-fill-nav-menu"></span> <small>Contact Types</small>
+                            </NavLink>
+                        </div>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="/User/Index">
+                                <span class="bi bi-person-fill-gear-nav-menu"></span> <small>Users</small>
+                            </NavLink>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/Customer/Index">
+                <span class="bi bi-people-nav-menu" aria-hidden="true"></span> <small>Customers</small>
+            </NavLink>
+        </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/Store/Index">
-                <span class="bi bi-shop-fill-nav-menu" aria-hidden="true"></span> Store
+                <span class="bi bi-shop-fill-nav-menu" aria-hidden="true"></span> <small>Store</small>
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/MyAccount">
-                <span class="bi bi-shop-fill-nav-menu" aria-hidden="true"></span> My Account
+                <span class="bi bi-person-circle-nav-menu" aria-hidden="true"></span> <small>My Account</small>
             </NavLink>
         </div>
 
-        @* ================= LOGIN / LOGOUT ================= *@
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/PaymentsMethods">
+                <span class="bi bi-shop-fill-nav-menu" aria-hidden="true"></span> <small>Payments Methods</small>
+            </NavLink>
+        </div>
+
+
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
