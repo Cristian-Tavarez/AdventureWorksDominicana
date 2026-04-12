@@ -25,17 +25,24 @@ public partial class EmployeePayHistory
     /// </summary>
     [Key]
     [Column(TypeName = "datetime")]
+    [Required(ErrorMessage = "La fecha de vigencia es obligatoria")]
+    [Display(Name = "Fecha de Cambio")]
     public DateTime RateChangeDate { get; set; }
 
     /// <summary>
     /// Salary hourly rate.
     /// </summary>
+   [Required(ErrorMessage = "El monto del sueldo es obligatorio")]
+    [Range(50.00, 15000.00, ErrorMessage = "El sueldo por hora debe estar entre RD$ 50.00 y RD$ 15,000.00")]
     [Column(TypeName = "money")]
+    [Display(Name = "Sueldo por Hora")]
     public decimal Rate { get; set; }
 
     /// <summary>
     /// 1 = Salary received monthly, 2 = Salary received biweekly
     /// </summary>
+    [Required(ErrorMessage = "La frecuencia de pago es obligatoria")]
+    [Range(1, 2, ErrorMessage = "Seleccione una frecuencia válida (Mensual o Quincenal)")]
     public byte PayFrequency { get; set; }
 
     /// <summary>
