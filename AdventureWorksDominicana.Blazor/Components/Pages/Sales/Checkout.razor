@@ -491,6 +491,7 @@
             validatorMessage = "Debe llenar todos los campos de dirección";
             return null;
         }
+
         var shipAddressId = await SaveAddress(showRegisterAddress, NewShipAddress, 1, SalesOrderHeader.ShipToAddressId);
         var creditCardId = await SaveCreditCards();
         var billAddressId = await SaveAddress(showRegisterNewBillAddress, NewBillAddress, 2, SalesOrderHeader.BillToAddressId);
@@ -533,7 +534,8 @@
         foreach (var s in ShoppingCartItemList)
         {
             var offer = s.Product?.SpecialOfferProducts?
-                .Where(x => x.SpecialOffer.StartDate <= DateTime.Now && x.SpecialOffer.EndDate >= DateTime.Now)
+                .Where(x => x.SpecialOffer.StartDate <= DateTime.Now && x.SpecialOffer.EndDate >= DateTime.Now).Where(x => x.SpecialOffer.Category == "Customer")
+                .Where(o => s.Quantity >= o.SpecialOffer.MinQty)
                 .OrderByDescending(x => x.SpecialOffer.DiscountPct)
                 .FirstOrDefault();
 
