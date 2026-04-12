@@ -114,7 +114,7 @@ public class ProductService(IDbContextFactory<Contexto> DbContextFactory) : ISer
                 producto.SellEndDate = DateTime.Now;
                 contexto.Products.Update(producto);
                 await contexto.SaveChangesAsync();
-                return true; ¿
+                return true; 
             }
             return false;
         }
