@@ -1,6 +1,11 @@
 ﻿@page "/PurchaseOrder/Create"
 @attribute [Authorize(Roles = "Admin, PurchasingManager")]
 
+@inject PurchaseOrderService purchaseOrderService
+@inject VendorService vendorService
+@inject ShipMethodService shipMethodService
+
+
 @using AdventureWorksDominicana.Data.Models
 @using AdventureWorksDominicana.Data.Context
 @using Microsoft.EntityFrameworkCore
@@ -122,8 +127,8 @@
     protected override async Task OnInitializedAsync()
     {
         
-        proveedores = await Db.Vendors.OrderBy(v => v.Name).ToListAsync();
-        metodos = await Db.ShipMethods.OrderBy(s => s.Name).ToListAsync();
+        proveedores = await vendorService.GetList(v => true);
+        metodos = await shipMethodService.GetList(s => true);
     }
 
     private async Task GuardarOrden()
