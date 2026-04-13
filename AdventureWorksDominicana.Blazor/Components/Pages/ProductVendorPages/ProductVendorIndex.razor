@@ -1,7 +1,11 @@
 ﻿@page "/ProductVendor/Index"
 @attribute [Authorize(Roles = "Admin, ProductionManager")]
+
+@using AdventureWorksDominicana.Data.Models
+@using AdventureWorksDominicana.Services
 @inject NavigationManager navigationManager
 @inject ProductVendorService productVendorService
+
 @rendermode InteractiveServer
 
 <PageTitle>Product Vendor</PageTitle>
@@ -53,15 +57,16 @@
                 </div>
             </div>
 
-            <div class="table table-striped table-bordered table-hover">
+            <div class="table-responsive">
                 <QuickGrid Items="ListaProductVendor" Class="table table-striped table-bordered table-hover">
-                    <PropertyColumn Property="@(e => e.BusinessEntityId)" Sortable="true" Title="Vendor ID" />
-                    <PropertyColumn Property="@(e => e.ProductId)" Sortable="true" Title="Product ID" />
+                    <PropertyColumn Property="@(e => e.BusinessEntity.Name)" Sortable="true" Title="Proveedor (Vendor)" />
+                    <PropertyColumn Property="@(e => e.Product.Name)" Sortable="true" Title="Producto" />
+                    
                     <PropertyColumn Property="@(e => e.StandardPrice)" Title="Precio Estándar" Sortable="true" />
                     <PropertyColumn Property="@(e => e.ModifiedDate)" Format="dd/MM/yyyy" Title="Fecha Modificación" Sortable="true" />
 
                     <TemplateColumn Title="Acciones">
-                        <a class="btn btn-outline-primary btn-sm" href="/ProductVendor/Edit/@context.BusinessEntityId">
+                        <a class="btn btn-outline-primary btn-sm" href="/ProductVendor/Edit/@context.ProductId/@context.BusinessEntityId">
                             <i class="bi bi-pencil-square"></i> Editar
                         </a>
                     </TemplateColumn>
@@ -95,11 +100,11 @@
         {
             if (Filtros == "Producto")
             {
-                resultado = await productVendorService.GetList(x => x.Product.Name.ToLower().Trim() == ValorFiltro.ToLower().Trim());
+                resultado = await productVendorService.GetList(x => x.Product.Name.ToLower().Contains(ValorFiltro.ToLower().Trim()));
             }
-            if (Filtros == "Vendedor")
+            else if (Filtros == "Vendedor")
             {
-                resultado = await productVendorService.GetList(x => x.BusinessEntity.Name.ToLower().Trim() == ValorFiltro.ToLower().Trim());
+                resultado = await productVendorService.GetList(x => x.BusinessEntity.Name.ToLower().Contains(ValorFiltro.ToLower().Trim()));
             }
             else
             {
