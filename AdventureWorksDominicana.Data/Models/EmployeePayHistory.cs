@@ -33,7 +33,6 @@ public partial class EmployeePayHistory
     /// Salary hourly rate.
     /// </summary>
    [Required(ErrorMessage = "El monto del sueldo es obligatorio")]
-    [Range(50.00, 15000.00, ErrorMessage = "El sueldo por hora debe estar entre RD$ 50.00 y RD$ 15,000.00")]
     [Column(TypeName = "money")]
     [Display(Name = "Sueldo por Hora")]
     public decimal Rate { get; set; }
