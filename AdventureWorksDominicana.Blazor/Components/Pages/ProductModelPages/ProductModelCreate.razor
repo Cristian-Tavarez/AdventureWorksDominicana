@@ -95,6 +95,23 @@
     {
         ListaCulturas = await cultureService.GetList(c => true);
     }
+     
+    @* --- FUNCIÓN PARA CONVERTIR DTO A XML --- *@
+    private string SerializarAXml<T>(T objeto)
+    {
+        if (objeto == null) return string.Empty;
+        try
+        {
+            var serializer = new XmlSerializer(typeof(T));
+            using (var sw = new StringWriter())
+            {
+                serializer.Serialize(sw, objeto);
+                return sw.ToString();
+            }
+        }
+        catch { return string.Empty; }
+    }
+
 
     private async Task AgregarDetalle()
     {
