@@ -1,5 +1,7 @@
 ﻿@page "/ProductModel/Create"
 @attribute [Authorize(Roles = "Admin, ProductionManager")]
+@using System.Xml.Serialization
+@using System.IO
 @inject NavigationManager navigationManager
 @inject ToastService toastService
 @inject ProductModelService modelService
