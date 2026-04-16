@@ -25,17 +25,18 @@
                     <InputText class="form-control" @bind-Value="model.Name" placeholder="Ej: Mountain-100, Road-50..." />
                     <ValidationMessage For="() => model.Name" />
                 </div>
+                @* --- CAMBIAR INPUTTEXTAREA POR INPUTTEXT VINCULADOS A DTOs --- *@
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Catálogo (XML)</label>
-                        <InputTextArea class="form-control" @bind-Value="model.CatalogDescription" rows="2" />
+                        <label class="form-label fw-bold">Material (Catálogo)</label>
+                        <InputText class="form-control" @bind-Value="catalogDto.Material" placeholder="Escriba el material..." />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Instrucciones (XML)</label>
-                        <InputTextArea class="form-control" @bind-Value="model.Instructions" rows="2" />
+                        <label class="form-label fw-bold">Instrucciones de Configuración</label>
+                        <InputText class="form-control" @bind-Value="instructionsDto.SetupSummary" placeholder="Escriba las instrucciones..." />
                     </div>
                 </div>
-                <!-- DETALLE: Descripciones (Mismo patrón que ProductCategoryCreate) -->
+
                 <div class="border border-success p-3 mb-3">
                     <h3 class="mb-3">Configuración de Idiomas y Textos</h3>
                     <div class="row mb-3 g-2">
@@ -85,6 +86,10 @@
     private ProductModel model = new() { ProductModelProductDescriptionCultures = new List<ProductModelProductDescriptionCulture>() };
     private List<Culture> ListaCulturas = new();
     private string nuevaCulturaId = "", nuevoTexto = "";
+
+    @* --- INSTANCIAR LOS DTOS --- *@
+    private CatalogDto catalogDto = new();
+    private InstructionsDto instructionsDto = new();
 
     protected override async Task OnInitializedAsync()
     {
