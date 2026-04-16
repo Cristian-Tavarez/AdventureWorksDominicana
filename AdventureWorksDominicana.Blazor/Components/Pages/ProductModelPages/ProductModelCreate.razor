@@ -140,6 +140,9 @@
 
     private async Task Guardar()
     {
+        @* --- (continuación): ASIGNAR EL XML GENERADO AL MODELO --- *@
+        model.CatalogDescription = SerializarAXml(catalogDto);
+        model.Instructions = SerializarAXml(instructionsDto);
         if (await modelService.Guardar(model))
         {
             toastService.ShowSuccess("Modelo de producto creado exitosamente.");
