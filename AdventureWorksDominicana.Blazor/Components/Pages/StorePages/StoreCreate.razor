@@ -58,6 +58,9 @@
     public Store Store { get; set; } = new Store();
     public List<SalesPerson> ListaSalesPerson { get; set; } = new();
 
+    @* --- INSTANCIAR LOS DTOS --- *@
+    private StoreDemographicsDto demographicsDto = new();
+
     protected override async Task OnInitializedAsync()
     {
         try
