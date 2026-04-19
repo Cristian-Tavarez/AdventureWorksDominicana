@@ -1,6 +1,7 @@
 ﻿@page "/ProductModel/Create"
 @attribute [Authorize(Roles = "Admin, ProductionManager")]
 @using System.Xml.Serialization
+@using System.Xml
 @using System.IO
 @inject NavigationManager navigationManager
 @inject ToastService toastService
@@ -9,36 +10,37 @@
 @inject CultureService cultureService
 @rendermode InteractiveServer
 
-<PageTitle>Crear Modelo</PageTitle>
+<PageTitle>Crear Modelo con DTO</PageTitle>
 
-<EditForm Model="model" OnValidSubmit="Guardar">
+<EditForm Model="model" OnValidSubmit="Guardar" FormName="ProductModelForm">
     <DataAnnotationsValidator />
 
     <div class="container mt-4">
         <div class="card shadow-lg">
-            <div class="card-header">
-                <h4 class="mb-0">Registro de Modelos de Producto</h4>
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Registro de Modelos (Modo DTO)</h4>
             </div>
             <div class="card-body">
                 <div class="mb-3">
                     <label class="form-label fw-bold">Nombre del Modelo</label>
-                    <InputText class="form-control" @bind-Value="model.Name" placeholder="Ej: Mountain-100, Road-50..." />
+                    <InputText class="form-control" @bind-Value="model.Name" placeholder="Ej: Mountain-500" />
                     <ValidationMessage For="() => model.Name" />
                 </div>
-                @* --- CAMBIAR INPUTTEXTAREA POR INPUTTEXT VINCULADOS A DTOs --- *@
+                
                 <div class="row mb-3">
+                    @* Campos que alimentan los DTOs *@
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Material (Catálogo)</label>
-                        <InputText class="form-control" @bind-Value="catalogDto.Material" placeholder="Escriba el material..." />
+                        <label class="form-label fw-bold">Material (Catalog XML)</label>
+                        <InputText class="form-control" @bind-Value="materialInput" placeholder="Ej: Aluminum Alloy" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Instrucciones de Configuración</label>
-                        <InputText class="form-control" @bind-Value="instructionsDto.SetupSummary" placeholder="Escriba las instrucciones..." />
+                        <label class="form-label fw-bold">Instrucciones (Instructions XML)</label>
+                        <InputText class="form-control" @bind-Value="instruccionInput" placeholder="Ej: Check tire pressure" />
                     </div>
                 </div>
 
-                <div class="border border-success p-3 mb-3">
-                    <h3 class="mb-3">Configuración de Idiomas y Textos</h3>
+                <div class="border border-info p-3 mb-3">
+                    <h5 class="mb-3">Detalle de Idiomas</h5>
                     <div class="row mb-3 g-2">
                         <div class="col-md-3">
                             <select class="form-select" @bind="nuevaCulturaId">
@@ -50,74 +52,66 @@
                             </select>
                         </div>
                         <div class="col-md-7">
-                            <InputTextArea class="form-control" rows="1" @bind-Value="nuevoTexto" placeholder="Texto descriptivo..." />
+                            <InputTextArea class="form-control" rows="1" @bind-Value="nuevoTexto" placeholder="Descripción en ese idioma..." />
                         </div>
                         <div class="col-md-2">
-                            <button type="button" class="btn btn-primary bi bi-plus w-100" @onclick="AgregarDetalle"> Agregar</button>
+                            <button type="button" class="btn btn-info w-100" @onclick="AgregarDetalle"> <i class="bi bi-plus"></i></button>
                         </div>
                     </div>
-                    <QuickGrid Items="model.ProductModelProductDescriptionCultures.AsQueryable()" Class="table table-striped table-bordered table-hover">
-                        <TemplateColumn Title="Idioma" Context="item">
-                            <span class="badge bg-secondary">@item.CultureId</span>
-                        </TemplateColumn>
-                        <TemplateColumn Title="Descripción" Context="item">
-                            @item.ProductDescription?.Description
-                        </TemplateColumn>
-                        <TemplateColumn Class="text-center" Title="Acción" Context="item">
-                            <button type="button" class="btn btn-outline-dark btn-sm bi bi-trash" @onclick="(() => RemoverDetalle(item))"> Eliminar</button>
+                    
+                    <QuickGrid Items="model.ProductModelProductDescriptionCultures.AsQueryable()" Class="table table-sm">
+                        <PropertyColumn Property="x => x.CultureId" Title="ID" />
+                        <TemplateColumn Title="Descripción">@context.ProductDescription?.Description</TemplateColumn>
+                        <TemplateColumn Title="Acción">
+                            <button type="button" class="btn btn-danger btn-sm" @onclick="(() => model.ProductModelProductDescriptionCultures.Remove(context))">Eliminar</button>
                         </TemplateColumn>
                     </QuickGrid>
-                </div>
-
-                <div class="mt-3 fw-bold">
-                    Total Idiomas Agregados: @model.ProductModelProductDescriptionCultures.Count
                 </div>
             </div>
 
             <div class="card-footer text-center">
-                <a class="btn btn-outline-secondary bi bi-arrow-left" href="/ProductModel/Index"> Volver</a>
-                <button type="submit" class="btn btn-outline-success bi bi-file-earmark"> Guardar</button>
+                <button type="submit" class="btn btn-success px-5">Guardar con XML</button>
             </div>
         </div>
     </div>
 </EditForm>
 
 @code {
-    private ProductModel model = new() { ProductModelProductDescriptionCultures = new List<ProductModelProductDescriptionCulture>() };
+    [SupplyParameterFromForm]
+    private ProductModel model { get; set; } = new() { ProductModelProductDescriptionCultures = new List<ProductModelProductDescriptionCulture>() };
+    
     private List<Culture> ListaCulturas = new();
-    private string nuevaCulturaId = "", nuevoTexto = "";
-
-    @* --- INSTANCIAR LOS DTOS --- *@
-    private CatalogDto catalogDto = new();
-    private InstructionsDto instructionsDto = new();
+    private string nuevaCulturaId = "", nuevoTexto = "", materialInput = "", instruccionInput = "";
 
     protected override async Task OnInitializedAsync()
     {
         ListaCulturas = await cultureService.GetList(c => true);
     }
-     
-    @* --- FUNCIÓN PARA CONVERTIR DTO A XML --- *@
+
     private string SerializarAXml<T>(T objeto)
     {
-        if (objeto == null) return string.Empty;
+        if (objeto == null) return null;
         try
         {
             var serializer = new XmlSerializer(typeof(T));
-            using (var sw = new StringWriter())
-            {
-                serializer.Serialize(sw, objeto);
-                return sw.ToString();
-            }
-        }
-        catch { return string.Empty; }
-    }
+            var settings = new XmlWriterSettings { OmitXmlDeclaration = true, Indent = false };
+            
+            // Forzamos el Namespace exacto y quitamos prefijos (como p1:)
+            var namespaces = new XmlSerializerNamespaces();
+            var xmlRoot = (XmlRootAttribute)Attribute.GetCustomAttribute(typeof(T), typeof(XmlRootAttribute))!;
+            namespaces.Add("", xmlRoot.Namespace);
 
+            using var sw = new StringWriter();
+            using var writer = XmlWriter.Create(sw, settings);
+            serializer.Serialize(writer, objeto, namespaces);
+            return sw.ToString();
+        }
+        catch { return null; }
+    }
 
     private async Task AgregarDetalle()
     {
         if (string.IsNullOrWhiteSpace(nuevaCulturaId) || string.IsNullOrWhiteSpace(nuevoTexto)) return;
-        
-        // Guardamos la descripción primero para tener el objeto persistido (o simulado si prefieres esperar al Guardar final)
         var pDesc = new ProductDescription { Description = nuevoTexto, ModifiedDate = DateTime.Now, Rowguid = Guid.NewGuid() };
         if (await descriptionService.Guardar(pDesc))
         {
@@ -128,35 +122,41 @@
                 ProductDescription = pDesc
             });
             nuevoTexto = "";
-            toastService.ShowSuccess("Texto agregado a la lista.");
         }
-    }
-
-    private void RemoverDetalle(ProductModelProductDescriptionCulture item)
-    {
-        model.ProductModelProductDescriptionCultures.Remove(item);
-        toastService.ShowWarning("Texto eliminado de la lista temporal.");
     }
 
     private async Task Guardar()
     {
-        @* --- (continuación): ASIGNAR EL XML GENERADO AL MODELO --- *@
-        model.CatalogDescription = SerializarAXml(catalogDto);
-        model.Instructions = SerializarAXml(instructionsDto);
+        // 1. Llenamos los campos XML usando los DTOs
+        if (!string.IsNullOrEmpty(materialInput))
+            model.CatalogDescription = SerializarAXml(new CatalogDto { Material = materialInput });
+
+        if (!string.IsNullOrEmpty(instruccionInput))
+            model.Instructions = SerializarAXml(new InstructionsDto { SetupSummary = instruccionInput });
+
+        model.ModifiedDate = DateTime.Now;
+        model.Rowguid = Guid.NewGuid();
+
         if (await modelService.Guardar(model))
         {
-            toastService.ShowSuccess("Modelo de producto creado exitosamente.");
+            toastService.ShowSuccess("Guardado exitosamente con DTOs.");
             navigationManager.NavigateTo("/ProductModel/Index");
         }
     }
-    @* --- DEFINIR LAS CLASES DTO AL FINAL --- *@
+
+    // --- ESTRUCTURA DE DTOS REQUERIDA POR ADVENTUREWORKS ---
+    
+    [XmlRoot(ElementName = "ProductDescription", Namespace = "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ProductModelDescription")]
     public class CatalogDto
     {
-        public string Material { get; set; } = "";
+        [XmlElement]
+        public string Material { get; set; }
     }
 
+    [XmlRoot(ElementName = "root", Namespace = "http://schemas.microsoft.com/sqlserver/2004/07/adventure-works/ProductModelInstructions")]
     public class InstructionsDto
     {
-        public string SetupSummary { get; set; } = "";
+        [XmlElement(ElementName = "Instructions")]
+        public string SetupSummary { get; set; }
     }
 }
